@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@theme {
+  --color-night: #14132B;
+  --color-night-surface: #1E1D42;
+  --color-night-surface-2: #262550;
+  --color-gold: #F2A93B;
+  --color-gold-soft: #F7C978;
+  --color-coral: #FF6B5C;
+  --color-mint: #4ADE9A;
+  --color-ink: #F5F3EF;
+  --color-muted: #9C9AC0;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-night);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+}
+
+/* Ticket / price-tag signature shape used on product cards */
+.price-tag {
+  position: relative;
+  border-radius: 14px;
+  clip-path: polygon(28px 0, 100% 0, 100% 100%, 28px 100%, 0 50%);
+  padding-left: 40px;
+}
+
+.price-tag::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-night);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
