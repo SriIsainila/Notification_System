@@ -1,4 +1,5 @@
 import { Trash2, ExternalLink, TrendingDown } from 'lucide-react'
+import { formatPrice } from '../utils/formatters.js'
 
 export default function ProductCard({ product, onDelete }) {
   const {
@@ -9,12 +10,14 @@ export default function ProductCard({ product, onDelete }) {
     store_name,
     url,
     in_stock = true,
+    currency = 'LKR',
   } = product
 
-  const isBelowTarget = target_price && current_price <= target_price
+  const hasTargetPrice = target_price !== null && target_price !== undefined && target_price !== ''
+  const isBelowTarget = hasTargetPrice && Number(current_price) <= Number(target_price)
 
   return (
-    <div className="price-tag bg-night-surface border border-white/10 flex gap-4 p-4 pr-5">
+    <div className="price-tag bg-night-surface border border-ink/10 shadow-sm flex gap-4 p-4 pr-5">
       <img
         src={image_url || 'https://placehold.co/96x96/262550/9C9AC0?text=No+Image'}
         alt={name}
@@ -38,10 +41,10 @@ export default function ProductCard({ product, onDelete }) {
 
         <div className="flex items-center gap-3 mt-2">
           <span className="font-display font-bold text-lg">
-            Rs. {Number(current_price).toLocaleString()}
+            {formatPrice(current_price, currency)}
           </span>
-          {target_price && (
-            <span className="text-xs text-muted">target Rs. {Number(target_price).toLocaleString()}</span>
+          {hasTargetPrice && (
+            <span className="text-xs text-muted">target {formatPrice(target_price, currency)}</span>
           )}
           {isBelowTarget && (
             <span className="flex items-center gap-1 text-xs font-medium text-mint bg-mint/10 px-2 py-0.5 rounded-full">

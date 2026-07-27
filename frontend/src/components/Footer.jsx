@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 mt-24">
+    <footer className="border-t border-ink/10 mt-24">
       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted">
         <p>© {new Date().getFullYear()} Nilify. Watch prices, not screens.</p>
         <div className="flex gap-6">

@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/authContext.js'
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,7 +16,7 @@ export default function Login() {
     setLoading(true)
     try {
       await login(form.email, form.password)
-      navigate('/dashboard')
+      navigate(location.state?.from?.pathname || '/dashboard', { replace: true })
     } catch (err) {
       setError(err.message || 'Something went wrong. Try again.')
     } finally {
@@ -39,7 +40,7 @@ export default function Login() {
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
             placeholder="you@example.com"
           />
         </div>
@@ -54,7 +55,7 @@ export default function Login() {
             required
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
             placeholder="••••••••"
           />
         </div>

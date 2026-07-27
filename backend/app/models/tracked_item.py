@@ -1,7 +1,19 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -12,6 +24,10 @@ class TrackedItem(Base):
     __tablename__ = "tracked_items"
     __table_args__ = (
         UniqueConstraint("user_id", "normalized_url", name="uq_tracked_items_user_normalized_url"),
+        CheckConstraint(
+            "status IN ('active', 'paused', 'removed')",
+            name="ck_tracked_items_status",
+        ),
     )
 
     item_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

@@ -170,12 +170,12 @@ async def test_scheduler_baseline_changes_deduplication_and_pausing() -> None:
 
 
 @pytest.mark.asyncio
-async def test_apscheduler_job_runs_every_five_minutes() -> None:
+async def test_apscheduler_job_runs_every_minute() -> None:
     start_scheduler()
     try:
         job = scheduler.get_job("tracked-url-check")
         assert job is not None
-        assert job.trigger.interval.total_seconds() == 300
+        assert job.trigger.interval.total_seconds() == settings.tracker_interval_minutes * 60
         assert job.max_instances == 1
         assert job.coalesce is True
     finally:

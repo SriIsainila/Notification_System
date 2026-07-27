@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/authContext.js'
 
 export default function Register() {
   const { register } = useAuth()
@@ -13,8 +13,8 @@ export default function Register() {
     e.preventDefault()
     setError('')
 
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.')
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.')
       return
     }
 
@@ -45,7 +45,7 @@ export default function Register() {
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
             placeholder="Your name"
           />
         </div>
@@ -60,7 +60,7 @@ export default function Register() {
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
             placeholder="you@example.com"
           />
         </div>
@@ -75,8 +75,8 @@ export default function Register() {
             required
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
-            placeholder="At least 6 characters"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            placeholder="At least 8 characters"
           />
         </div>
 

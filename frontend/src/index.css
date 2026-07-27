@@ -2,15 +2,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
 @theme {
-  --color-night: #14132B;
-  --color-night-surface: #1E1D42;
-  --color-night-surface-2: #262550;
-  --color-gold: #F2A93B;
-  --color-gold-soft: #F7C978;
-  --color-coral: #FF6B5C;
-  --color-mint: #4ADE9A;
-  --color-ink: #F5F3EF;
-  --color-muted: #9C9AC0;
+  --color-night: #F1FAF4;
+  --color-night-surface: #FFFFFF;
+  --color-night-surface-2: #E3F4E8;
+  --color-gold: #36A85A;
+  --color-gold-soft: #55BC72;
+  --color-coral: #D94A4A;
+  --color-mint: #16864A;
+  --color-ink: #173A24;
+  --color-muted: #65806D;
 
   --font-display: 'Sora', sans-serif;
   --font-body: 'Inter', sans-serif;

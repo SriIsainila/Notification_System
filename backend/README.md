@@ -55,12 +55,15 @@ and reports timeouts, blocked websites, empty bodies, and non-HTML responses con
 
 ## Tracking scheduler
 
-APScheduler runs `tracked-url-check` every five minutes while enabled. The worker claims
-due active items with PostgreSQL row locking, limits scrape concurrency, stores baseline
+APScheduler runs `tracked-url-check` every minute while enabled. The worker selects
+active items, limits scrape concurrency, isolates failures between URLs, stores baseline
 and price history, detects title/price/image/stock/variant changes, and creates pending
-notifications. Snapshot hashes, atomic transactions, row claims, an advisory leader lock,
-and a unique change/channel constraint prevent duplicate notifications. Failed checks use
-exponential backoff and record their last error.
+notifications. Snapshot hashes, atomic transactions, row locks, an advisory leader lock,
+and a unique change/channel constraint prevent duplicate notifications. Failed checks record
+their last error without stopping the remaining URLs and are retried in the next cycle.
+
+Set `TRACKER_INTERVAL_MINUTES` in `.env` to control the interval. Use `1` for testing
+or `1440` to run the tracker once per day, then restart the backend.
 
 ## Notification endpoints
 

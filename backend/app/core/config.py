@@ -34,7 +34,11 @@ class Settings(BaseSettings):
     frontend_origins: str = "http://localhost:5173"
 
     scheduler_enabled: bool = True
-    scheduler_interval_seconds: int = Field(default=300, ge=10)
+    tracker_interval_minutes: int = Field(
+        default=1,
+        ge=1,
+        validation_alias="TRACKER_INTERVAL_MINUTES",
+    )
     scheduler_batch_size: int = Field(default=50, ge=1, le=500)
     scheduler_concurrency: int = Field(default=5, ge=1, le=20)
 

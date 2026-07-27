@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as postgresql_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -102,7 +103,12 @@ async def record_failure(item_id: int, message: str) -> None:
         await session.commit()
 
 
-async def process_item(item_id: int, scraper: Scraper = scrape_product) -> tuple[int, int]:
+async def check_tracked_url(item_id: int, scraper: Scraper = scrape_product) -> tuple[int, int]:
+    """Fetch one active tracked URL and persist any detected product changes.
+
+    Returns the number of recorded changes and notifications. An unchanged
+    snapshot only refreshes ``last_checked_at`` and clears prior failure state.
+    """
     async with AsyncSessionFactory() as session:
         item = await session.get(TrackedItem, item_id)
         if item is None or item.status != "active":
@@ -160,16 +166,20 @@ async def process_item(item_id: int, scraper: Scraper = scrape_product) -> tuple
             session.add(change)
             await session.flush()
             if notify:
-                session.add(
-                    Notification(
+                notification_id = await session.scalar(
+                    postgresql_insert(Notification)
+                    .values(
                         user_id=item.user_id,
                         item_change_id=change.change_id,
                         message=notification_message(item, change_type, old_value, new_value),
                         channel=item.notify_channel,
                         delivery_status="pending",
                     )
+                    .on_conflict_do_nothing(constraint="uq_notifications_change_channel")
+                    .returning(Notification.notification_id)
                 )
-                notification_count += 1
+                if notification_id is not None:
+                    notification_count += 1
 
         if snapshot.title:
             item.title = snapshot.title
@@ -186,17 +196,19 @@ async def process_item(item_id: int, scraper: Scraper = scrape_product) -> tuple
         return len(changes), notification_count
 
 
-async def process_due_items(scraper: Scraper = scrape_product) -> WorkerResult:
-    async with AsyncSessionFactory() as session:
-        item_ids = await claim_due_items(session)
+async def process_item(item_id: int, scraper: Scraper = scrape_product) -> tuple[int, int]:
+    """Backward-compatible wrapper for checking one tracked URL."""
+    return await check_tracked_url(item_id, scraper)
 
+
+async def process_item_ids(item_ids: list[int], scraper: Scraper) -> WorkerResult:
     summary = WorkerResult(claimed=len(item_ids))
     semaphore = asyncio.Semaphore(settings.scheduler_concurrency)
 
     async def run_one(item_id: int) -> tuple[bool, int, int]:
         async with semaphore:
             try:
-                change_count, notification_count = await process_item(item_id, scraper)
+                change_count, notification_count = await check_tracked_url(item_id, scraper)
                 return True, change_count, notification_count
             except Exception:
                 return False, 0, 0
@@ -210,3 +222,21 @@ async def process_due_items(scraper: Scraper = scrape_product) -> WorkerResult:
         else:
             summary.failed += 1
     return summary
+
+
+async def process_active_items(scraper: Scraper = scrape_product) -> WorkerResult:
+    """Check every active item once, isolating failures between URLs."""
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(
+            select(TrackedItem.item_id)
+            .where(TrackedItem.status == "active")
+            .order_by(TrackedItem.item_id)
+        )
+        item_ids = list(result.scalars().all())
+    return await process_item_ids(item_ids, scraper)
+
+
+async def process_due_items(scraper: Scraper = scrape_product) -> WorkerResult:
+    async with AsyncSessionFactory() as session:
+        item_ids = await claim_due_items(session)
+    return await process_item_ids(item_ids, scraper)

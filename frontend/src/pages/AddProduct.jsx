@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
-import { addTrackedProduct } from '../api/products.js'
+import { addTrackedProduct } from '../services/productService.js'
 
 export default function AddProduct() {
-  const { token } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ url: '', targetPrice: '', notifyChannel: 'email' })
+  const [form, setForm] = useState({
+    url: '',
+    changeScope: 'all',
+    notifyChannel: 'email',
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -23,7 +25,7 @@ export default function AddProduct() {
 
     setLoading(true)
     try {
-      await addTrackedProduct(form, token)
+      await addTrackedProduct(form)
       navigate('/dashboard')
     } catch (err) {
       setError(err.message || 'Could not add this product. Try again.')
@@ -36,7 +38,7 @@ export default function AddProduct() {
     <div className="max-w-md mx-auto px-6 py-16">
       <h1 className="font-display text-3xl font-bold mb-2">Track a new product</h1>
       <p className="text-muted mb-8 text-sm">
-        Paste the product link and tell us the price you're waiting for.
+        Paste the product link and choose which changes you want to follow.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,26 +52,27 @@ export default function AddProduct() {
             required
             value={form.url}
             onChange={(e) => setForm({ ...form, url: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
             placeholder="https://www.daraz.lk/products/..."
           />
         </div>
 
         <div>
-          <label htmlFor="targetPrice" className="block text-sm text-muted mb-1.5">
-            Target price (optional)
+          <label htmlFor="changeScope" className="block text-sm text-muted mb-1.5">
+            Changes to track
           </label>
-          <input
-            id="targetPrice"
-            type="number"
-            min="0"
-            value={form.targetPrice}
-            onChange={(e) => setForm({ ...form, targetPrice: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
-            placeholder="e.g. 9000"
-          />
+          <select
+            id="changeScope"
+            value={form.changeScope}
+            onChange={(e) => setForm({ ...form, changeScope: e.target.value })}
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
+          >
+            <option value="price">Price changes</option>
+            <option value="stock">Stock changes</option>
+            <option value="all">All changes</option>
+          </select>
           <p className="text-xs text-muted mt-1.5">
-            Leave blank to get notified on any price drop.
+            You will be notified when the selected product information changes.
           </p>
         </div>
 
@@ -81,10 +84,10 @@ export default function AddProduct() {
             id="notifyChannel"
             value={form.notifyChannel}
             onChange={(e) => setForm({ ...form, notifyChannel: e.target.value })}
-            className="w-full bg-night-surface border border-white/10 rounded-lg px-4 py-2.5 focus-ring outline-none"
+            className="w-full bg-night-surface border border-ink/15 rounded-lg px-4 py-2.5 focus-ring outline-none"
           >
-            <option value="email">Email</option>
-            <option value="push">Browser push</option>
+            <option value="email">In e-mail</option>
+            <option value="system">System</option>
           </select>
         </div>
 

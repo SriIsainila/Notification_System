@@ -2,64 +2,34 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import ProductCard from '../components/ProductCard.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
-import { getTrackedProducts, deleteTrackedItem } from '../api/products.js'
-
-// Placeholder data so the dashboard is visible before the backend is connected.
-// Once /api/products is live, this is replaced by the real fetch below.
-const MOCK_PRODUCTS = [
-  {
-    id: '1',
-    name: 'Noise Cancelling Headphones',
-    store_name: 'Daraz.lk',
-    current_price: 8490,
-    target_price: 9000,
-    image_url: '',
-    url: '#',
-    in_stock: true,
-  },
-  {
-    id: '2',
-    name: 'Mechanical Keyboard 87-Key',
-    store_name: 'Amazon.in',
-    current_price: 12500,
-    target_price: 10000,
-    image_url: '',
-    url: '#',
-    in_stock: true,
-  },
-]
+import { deleteTrackedItem, getTrackedProducts } from '../services/productService.js'
 
 export default function Dashboard() {
-  const { token } = useAuth()
-  const [products, setProducts] = useState(MOCK_PRODUCTS)
+  const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await getTrackedProducts(token)
+        const data = await getTrackedProducts()
         setProducts(data)
-        setUsingMock(false)
-      } catch {
-        // Backend not connected yet — keep showing mock data
-        setUsingMock(true)
+      } catch (err) {
+        setError(err.message || 'Could not load tracked products.')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [token])
+  }, [])
 
   async function handleDelete(id) {
-    setProducts((prev) => prev.filter((p) => p.id !== id))
-    if (!usingMock) {
-      try {
-        await deleteTrackedItem(id, token)
-      } catch {
-        // silently ignore for now — could add a toast here
-      }
+    setError('')
+    try {
+      await deleteTrackedItem(id)
+      setProducts((previous) => previous.filter((product) => product.id !== id))
+    } catch (err) {
+      setError(err.message || 'Could not remove this product.')
     }
   }
 
@@ -69,7 +39,7 @@ export default function Dashboard() {
         <div>
           <h1 className="font-display text-3xl font-bold">Your tracked products</h1>
           <p className="text-muted text-sm mt-1">
-            {usingMock ? 'Showing sample data — connect your backend to see real prices.' : `${products.length} product(s) tracked`}
+            {`${products.length} product(s) tracked`}
           </p>
         </div>
         <Link
@@ -81,10 +51,12 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      {error && <p className="text-coral text-sm mb-4">{error}</p>}
+
       {loading ? (
         <p className="text-muted text-sm">Loading…</p>
       ) : products.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-white/15 rounded-2xl">
+        <div className="text-center py-20 border border-dashed border-ink/20 rounded-2xl bg-white/50">
           <p className="text-muted mb-4">You're not tracking anything yet.</p>
           <Link to="/add-product" className="text-gold hover:text-gold-soft font-medium focus-ring rounded">
             Add your first product →

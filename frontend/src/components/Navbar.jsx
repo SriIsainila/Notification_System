@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Bell, Plus } from 'lucide-react'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/authContext.js'
 
 export default function Navbar() {
-  const { user, logout } = useAuth()
+  const { user, loading, logout } = useAuth()
   const navigate = useNavigate()
 
   return (
-    <header className="border-b border-white/10 bg-night/80 backdrop-blur sticky top-0 z-40">
+    <header className="border-b border-ink/10 bg-night/80 backdrop-blur sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 focus-ring rounded">
           <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center">
@@ -17,7 +17,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-3">
-          {user ? (
+          {loading ? null : user ? (
             <>
               <Link
                 to="/dashboard"
@@ -33,8 +33,8 @@ export default function Navbar() {
                 Track a product
               </Link>
               <button
-                onClick={() => {
-                  logout()
+                onClick={async () => {
+                  await logout()
                   navigate('/')
                 }}
                 className="text-sm text-muted hover:text-ink transition-colors focus-ring rounded px-2 py-1"
